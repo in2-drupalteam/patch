@@ -62,7 +62,7 @@ index 18c5263..a090ce6 100644
 +       } 
 +        //Modificacions usuarios anonymous redirect register
 +       if(!user_access('use vote up/down')) {
-+        $variables['link_up'] = url('/fb_register',array('query' => array('destination' => 'ideas-gallery')));
++        $variables['link_up'] = url('fb_register',array('query' => array('destination' => 'ideas-gallery')));
 +        $variables['link_class_up'] .= ' colorbox-node';
 +        $variables['link_extra'] = ' data-inner-width="600" data-inner-height="300"';
 +       }
