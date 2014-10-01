@@ -1,0 +1,148 @@
+diff --git a/vud.theme.inc b/vud.theme.inc
+index 18c5263..88601de 100644
+--- a/vud.theme.inc
++++ b/vud.theme.inc
+@@ -167,6 +167,7 @@ function vud_widget_proxy($variables) {
+   $widget_theme = $variables['widget_theme'];
+   $readonly = $variables['readonly'];
+ 
++
+   drupal_add_library('system', 'drupal.ajax');
+   ctools_add_js('ajax-responder');
+   ctools_include('ajax');
+@@ -211,13 +212,17 @@ function vud_widget_proxy($variables) {
+ 
+   // Prepare links only if it's not readonly, or if readonly but we need to show
+   // a messgae on deny.
++  
++  $variables['validate_date'] = vud_date_vote_validate($entity_id);
++  $variables['link_extra'] = '';
++  
+   $message_on_deny = variable_get('vud_message_on_deny', FALSE);
+   if (!$readonly || ($readonly && $message_on_deny)) {
+     // Widget needs to show links.
+-    if ($up_access) {
++    //if ($up_access) {
+       $variables['class_up'] = 'up-inactive';
+       $variables['show_up_as_link'] = TRUE;
+-    }
++    //}
+     if ($down_access) {
+       $variables['class_down'] = 'down-inactive';
+       $variables['show_down_as_link'] = TRUE;
+@@ -229,26 +234,39 @@ function vud_widget_proxy($variables) {
+     $variables['show_links'] = TRUE;
+   }
+ 
+-  if (!$readonly) {
++  if (!$readonly)  {
+     // Widget has link(s).
+-    if ($up_access) {
+-      $token_up = drupal_get_token("vote/$type/$entity_id/1/$tag/$widget_theme");
+-      $variables['link_up'] = url("vote/$type/$entity_id/1/$tag/$widget_theme/$token_up/nojs");
+-      $variables['link_class_up'] .= ' use-ajax';
+-    }
+-    if ($down_access) {
+-      $token_down = drupal_get_token("vote/$type/$entity_id/-1/$tag/$widget_theme");
+-      $variables['link_down'] = url("vote/$type/$entity_id/-1/$tag/$widget_theme/$token_down/nojs");
+-      $variables['link_class_down'] .= ' use-ajax';
+-    }
+-    if ($reset_access) {
+-      $token_reset = drupal_get_token("votereset/$type/$entity_id/$tag/$widget_theme");
+-      $variables['link_reset'] = url("votereset/$type/$entity_id/$tag/$widget_theme/$token_reset");
+-      $variables['link_class_reset'] .= ' use-ajax';
+-    }
++    //if(vud_date_vote_validate($entity_id)) {
++
++      
++      if ($up_access) {
++        $token_up = drupal_get_token("vote/$type/$entity_id/1/$tag/$widget_theme");
++        $variables['link_up'] = url("vote/$type/$entity_id/1/$tag/$widget_theme/$token_up/nojs");
++        $variables['link_class_up'] .= ' use-ajax';
++       } 
++        //Modificacions usuarios anonymous redirect register
++       if(!user_access('use vote up/down')) {
++        $variables['link_up'] = url('fb_register',array('query' => array('destination' => 'ideas-gallery')));
++        $variables['link_class_up'] .= ' colorbox-node';
++        $variables['link_extra'] = ' data-inner-width="600" data-inner-height="300"';
++       }
++    
++      if ($down_access) {
++        $token_down = drupal_get_token("vote/$type/$entity_id/-1/$tag/$widget_theme");
++        $variables['link_down'] = url("vote/$type/$entity_id/-1/$tag/$widget_theme/$token_down/nojs");
++        $variables['link_class_down'] .= ' use-ajax';
++      }
++
++      if ($reset_access) {
++        $token_reset = drupal_get_token("votereset/$type/$entity_id/$tag/$widget_theme");
++        $variables['link_reset'] = url("votereset/$type/$entity_id/$tag/$widget_theme/$token_reset");
++        $variables['link_class_reset'] .= ' use-ajax';
++      } 
++    //}
+   }
+-  elseif ($readonly && $message_on_deny) {
++  elseif ($readonly && $message_on_deny ) {
+     // Readonly widget, but with a deny messgae.
++    echo 'hola';
+     ctools_include('modal');
+     ctools_modal_add_js();
+     if ($up_access) {
+@@ -269,6 +287,7 @@ function vud_widget_proxy($variables) {
+   }
+   else {
+     // Readonly widget.
++    echo 'hola';
+     $variables['link_up'] = '#';
+     $variables['link_down'] = '#';
+     $variables['link_reset'] = '#';
+@@ -519,3 +538,13 @@ function vud_reset($type, $entity_id, $tag, $widget, $token, $ajax = 'ajax') {
+     drupal_goto($_SERVER['HTTP_REFERER']);
+   }
+ }
++
++/* Funcio per validar si es pot votar o no */
++function vud_date_vote_validate($entity_id) {
++  $node = node_load($entity_id);
++  $now_date = strtotime(date('d-m-Y'));
++  $date = format_date($node->created,'custom','d-m-Y');
++  $new_date = strtotime ( '+30 day' , strtotime ( $date ) ) ;
++  if ($now_date > $new_date) return false;
++  else return true;
++ }
+diff --git a/widgets/alternate/widget.tpl.php b/widgets/alternate/widget.tpl.php
+index 7e605eb..b198f24 100644
+--- a/widgets/alternate/widget.tpl.php
++++ b/widgets/alternate/widget.tpl.php
+@@ -9,16 +9,20 @@
+ <div class="vud-widget vud-widget-alternate" id="<?php print $id; ?>">
+   <?php if ($class_up) : ?>
+     <div class="alternate-votes-display"><?php print $unsigned_points; ?></div>
++    <?php if ($validate_date):?>
+     <?php if ($show_links): ?>
+-      <?php if ($show_up_as_link): ?>
+-        <a href="<?php print $link_up; ?>" rel="nofollow" class="<?php print $link_class_up; ?>">
+-      <?php endif; ?>
++      <?php if (!empty($link_up)):?>
++       <?php if ($show_up_as_link): ?>
++        <a href="<?php print $link_up; ?>" rel="nofollow" class="<?php print $link_class_up; ?>" <?php print $link_extra; ?>>
++        <?php endif; ?>
+           <div class="<?php print $class_up; ?>" title="<?php print t('Vote up!'); ?>"></div>
+           <div class="element-invisible"><?php print t('Vote up!'); ?></div>
+       <?php if ($show_up_as_link): ?>
+         </a>
+       <?php endif; ?>
++      <?php endif?>
+     <?php endif; ?>
++     
+     <?php if ($show_reset): ?>
+       <a href="<?php print $link_reset; ?>" rel="nofollow" class="<?php print $link_class_reset; ?>" title="<?php print $reset_long_text; ?>">
+         <div class="<?php print $class_reset; ?>">
+@@ -26,5 +30,8 @@
+         </div>
+       </a>
+     <?php endif; ?>
++      <?php else:?>
++    <div class=""><?php print t('oami_voting_has_ended')?></div>  
++    <?php endif?>  
+   <?php endif; ?>
+ </div>
