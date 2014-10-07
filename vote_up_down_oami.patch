@@ -100,8 +100,6 @@ index 18c5263..1fb2538
 +  else return true;
 + }
 diff --git a/widgets/alternate/widget.tpl.php b/widgets/alternate/widget.tpl.php
-old mode 100644
-new mode 100755
 index 7e605eb..7abd945
 --- a/widgets/alternate/widget.tpl.php
 +++ b/widgets/alternate/widget.tpl.php
