@@ -113,7 +113,7 @@ index 7e605eb..d929676 100644
 -        <a href="<?php print $link_up; ?>" rel="nofollow" class="<?php print $link_class_up; ?>">
 -      <?php endif; ?>
 -          <div class="<?php print $class_up; ?>" title="<?php print t('Vote up!'); ?>"></div>
-+    <div class="alternate-votes-display"><?php print $unsigned_points; ?> <?php print t('oami_votes')?></div>
++    <div class="alternate-votes-display"><?php print $unsigned_points; ?> <?php print t('oami_likes')?></div>
 +    <?php if ($validate_date):?>
 +      <?php if ($show_links): ?>
 +        <?php if (!empty($link_up)):?>
